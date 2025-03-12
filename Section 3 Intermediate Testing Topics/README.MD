@@ -76,7 +76,6 @@ export class StringUtils {
   }
 
 }  
-
 ```
 
 our hooks
@@ -127,5 +126,76 @@ our hooks
     });
 
   });
+```
+
+# Testing for Errors
+
+Utils.ts
+
+```ts
+export class StringUtils {
+
+  public toUpperCase(arg: string) {
+
+    if (!arg) {
+
+      throw new Error("Invalid argument!");
+
+    }
+
+    return toUpperCase(arg);
+
+  }
+
+}
+
+```
+
+Utils.test.ts
+
+```ts
+it.only("Should throw error on invalid argument - function", () => {
+
+      function expectError() {
+
+        const actual = sut.toUpperCase("");
+
+      }
+
+      expect(expectError).toThrow();
+
+      expect(expectError).toThrow("Invalid argument");
+
+    });
+
+    it.only("Should throw error on invalid argument - arrow function", () => {
+
+      expect(() => {
+
+        sut.toUpperCase("");
+
+      }).toThrow("Invalid argument");
+
+    });
+
+    it("Should throw error on invalid argument - try catch block", (done) => {
+
+      try {
+
+        sut.toUpperCase("");
+
+        done("GetStringInfo should throw error for invalid arg! ");
+
+      } catch (error) {
+
+        expect(error).toBeInstanceOf(Error);
+
+        expect(error).toHaveProperty("message", "Invalid argument!");
+
+        done();
+
+      }
+
+    });
 
 ```
