@@ -7,6 +7,8 @@ const config: Config.InitialOptions = {
   testEnvironment: "node",
   // Enable verbose mode, so Jest provides detailed test output in the console
   verbose: true,
+  collectCoverage: true,
+  collectCoverageFrom: ["<rootDir>/src/app/**/*.ts"],
 };
 
 export default config;

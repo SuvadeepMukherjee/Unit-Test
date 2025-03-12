@@ -15,7 +15,7 @@ describe("Utils test suite", () => {
       console.log("Actual test");
     });
 
-    it.only("Should throw error on invalid argument - function", () => {
+    it("Should throw error on invalid argument - function", () => {
       function expectError() {
         const actual = sut.toUpperCase("");
       }
@@ -23,7 +23,7 @@ describe("Utils test suite", () => {
       expect(expectError).toThrow("Invalid argument");
     });
 
-    it.only("Should throw error on invalid argument - arrow function", () => {
+    it("Should throw error on invalid argument - arrow function", () => {
       expect(() => {
         sut.toUpperCase("");
       }).toThrow("Invalid argument");
