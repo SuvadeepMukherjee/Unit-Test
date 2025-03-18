@@ -19,3 +19,37 @@ Test Driven Development -the TDD Cycle
 - Then we write the implementation so they will be passing(green)
 
 - After we have the implementation we are free to change or add other logic 
+
+---
+
+## Coding Katas - Password Checker
+
+Coding Project:password checker 
+
+- Simple requirements ,big complications
+
+- Requirements 
+  
+  - Iteration 1
+  
+  - A password is invalid if 
+    
+    - Length is less than 8 chars
+    
+    - has no uppercase letters
+    
+    - has no lowercase letters
+    
+    Iteration 2 
+    
+    - returns the reasons for invalidity
+    
+    Iteration 3
+    
+    - admin passwords should contain a number
+    
+    
+    
+    
+    
+    
