@@ -379,3 +379,255 @@ describe("PasswordChecker test suite", () => {
 });
 
 ```
+
+## PassChecker Iteration 3
+
+
+
+A password is invalid if
+
+- length is less than 8 chars
+
+- has no upper case letters
+
+- has no lower case letters
+
+Requirement 2:
+
+- return the reason that make a password invalid
+
+Requirement 3:
+
+- refactor
+
+- Admin passwords should also contain a number
+
+
+
+
+
+PasswordChecker.ts
+
+```ts
+//class contains a public method checkPassword
+
+// Enum defining possible password validation errors with corresponding error messages
+
+export enum PasswordErrors {
+
+  SHORT = "Password is too short!",
+
+  NO_UPPER_CASE = "Upper case letter required!",
+
+  NO_LOWER_CASE = "Lower case letter required!",
+
+  NO_NUMBER = "At least one number required",
+
+}
+
+// Interface defining the structure of a password validation result
+
+export interface CheckResult {
+
+  valid: boolean;
+
+  reasons: PasswordErrors[];
+
+}
+
+export class PasswordChecker {
+
+  public checkPassword(password: string): CheckResult {
+
+    const reasons: PasswordErrors[] = [];
+
+    this.checkForLength(password, reasons);
+
+    this.checkForUpperCase(password, reasons);
+
+    this.checkForLowerCase(password, reasons);
+
+    return {
+
+      valid: reasons.length > 0 ? false : true,
+
+      reasons: reasons,
+
+    };
+
+  }
+
+  public checkAdminPassword(password: string): CheckResult {
+
+    const basicCheck = this.checkPassword(password);
+
+    this.checkForNumber(password, basicCheck.reasons);
+
+    return {
+
+      valid: basicCheck.reasons.length > 0 ? false : true,
+
+      reasons: basicCheck.reasons,
+
+    };
+
+  }
+
+  private checkForNumber(password: string, reasons: PasswordErrors[]) {
+
+    const hasNumber = /\d/;
+
+    if (!hasNumber.test(password)) {
+
+      reasons.push(PasswordErrors.NO_NUMBER);
+
+    }
+
+  }
+
+  private checkForLength(password: string, reasons: PasswordErrors[]) {
+
+    if (password.length < 8) {
+
+      reasons.push(PasswordErrors.SHORT);
+
+    }
+
+  }
+
+  private checkForUpperCase(password: string, reasons: PasswordErrors[]) {
+
+    if (password == password.toLowerCase()) {
+
+      reasons.push(PasswordErrors.NO_UPPER_CASE);
+
+    }
+
+  }
+
+  private checkForLowerCase(password: string, reasons: PasswordErrors[]) {
+
+    if (password == password.toUpperCase()) {
+
+      reasons.push(PasswordErrors.NO_LOWER_CASE);
+
+    }
+
+  }
+
+}
+
+```
+
+PasswordChecker.test.ts
+
+```ts
+import {
+
+  PasswordChecker,
+
+  PasswordErrors,
+
+} from "../../app/pass_checker/PasswordChecker";
+
+describe("PasswordChecker test suite", () => {
+
+  let sut: PasswordChecker; //declare a variable to hold the system under test(SUT)
+
+  beforeEach(() => {
+
+    //Before each test, create a new instance of `PasswordChecker`.
+
+    sut = new PasswordChecker();
+
+  });
+
+  it("Password with less than 8 chars is invalid ", () => {
+
+    const actual = sut.checkPassword("1234567");
+
+    expect(actual.valid).toBe(false);
+
+    expect(actual.reasons).toContain(PasswordErrors.SHORT);
+
+  });
+
+  it("Password with more than 8 chars is ok", () => {
+
+    const actual = sut.checkPassword("12345678");
+
+    //expect(actual.valid).toBe(true);
+
+    expect(actual.reasons).not.toContain(PasswordErrors.SHORT);
+
+  });
+
+  it("Password with no uppercase letter  is invalid", () => {
+
+    const actual = sut.checkPassword("abcd");
+
+    expect(actual.reasons).toContain(PasswordErrors.NO_UPPER_CASE);
+
+    expect(actual.valid).toBe(false);
+
+  });
+
+  it("password with upper case letter is valid", () => {
+
+    const actual = sut.checkPassword("abcD");
+
+    expect(actual.reasons).not.toContain(PasswordErrors.NO_UPPER_CASE);
+
+    // expect(actual.valid).toBe(true);
+
+  });
+
+  it("password with no lowercase letter is invalid", () => {
+
+    const actual = sut.checkPassword("ABCD");
+
+    expect(actual.reasons).toContain(PasswordErrors.NO_LOWER_CASE);
+
+    // expect(actual).toBe(false);
+
+  });
+
+  it("password with lower case letter is valid", () => {
+
+    const actual = sut.checkPassword("ABCDa");
+
+    expect(actual.reasons).not.toContain(PasswordErrors.NO_LOWER_CASE);
+
+  });
+
+  it("Complex password is valid", () => {
+
+    const actual = sut.checkPassword("1234abcD");
+
+    expect(actual.reasons).toHaveLength(0);
+
+    expect(actual.valid).toBe(true);
+
+  });
+
+  it("Admin password with no number is invalid", () => {
+
+    const actual = sut.checkAdminPassword("abcD");
+
+    expect(actual.reasons).toContain(PasswordErrors.NO_NUMBER);
+
+    expect(actual.valid).toBe(false);
+
+  });
+
+  it("Admin password with  number is valid", () => {
+
+    const actual = sut.checkAdminPassword("abcD1");
+
+    expect(actual.reasons).not.toContain(PasswordErrors.NO_NUMBER);
+
+  });
+
+});
+
+```
