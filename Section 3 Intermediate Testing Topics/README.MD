@@ -148,7 +148,6 @@ export class StringUtils {
   }
 
 }
-
 ```
 
 Utils.test.ts
@@ -197,5 +196,63 @@ it.only("Should throw error on invalid argument - function", () => {
       }
 
     });
+```
+
+# Jest Aliases and watch mode
+
+only => only run that test (describe block or test(it)
+
+skip => it will skip the test suites 
+
+concurrent => run concurrently with other tests
+
+todo => we can make a skeleton of our testing application 
+
+xit => alias for it.skip 
+
+fit => alias for it.only 
+
+Watch mode => This is a feature when we need quick feedback to our test or to our implementation
+
+```json
+"scripts": {
+
+    "test": "jest --watch"
+
+  },
+```
+
+# VSCode debug configuration
+
+# Coverage
+
+jest.config.ts file 
+
+```ts
+import type { Config } from "@jest/types";
+
+const config: Config.InitialOptions = {
+
+  // Use "ts-jest" preset, which allows Jest to run TypeScript tests
+
+  preset: "ts-jest",
+
+  // Set the test environment to "node", meaning tests will run in a Node.js environment
+
+  testEnvironment: "node",
+
+  // Enable verbose mode, so Jest provides detailed test output in the console
+
+  verbose: true,
+
+  collectCoverage: true,
+
+  collectCoverageFrom: ["<rootDir>/src/app/**/*.ts"],
+
+};
+
+export default config;
 
 ```
+
+Sometimes we can ignore some code that is trivial or difficult or maybe we have another reason to from the code coverage , we do it with the following command `/*Istanbul ignore next*`
