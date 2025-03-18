@@ -151,3 +151,244 @@ export function toUpperCaseWithCb(
 Fakes is a simplilfied working implementation of different functionalities that we use 
 
 In this particular case any function with a string argument will do .Test coverage is misleading .And also we are not sure that this callback is called at all or not into our implementation.In this case we need a more complex fake testing object called a mock
+
+# Jest Mock vs Custom Mock in Callback Testing
+
+## **Why Use `callBackMock` Instead of `()=>{}`?**
+
+In some test cases, we're using `callBackMock`, while in others, we're using an empty arrow function `()=>{}`. Let's break down the reasoning behind this.
+
+### **Why?**
+
+✅ **Tracking Behavior** – `callBackMock` lets us track:
+
+- How many times the callback was called (`toBeCalledTimes(n)`)
+- What argument was passed to the callback (`toBeCalledWith(value)`)  
+  ✅ **Verifying Side Effects** – We can **store** arguments (`cbArgs.push(arg)`) and **count calls** (`timesCalled++`)
+
+## **2. When We Use `()=>{}`**
+
+### **Example:**
+
+```ts
+it("ToUpperCase-calls callback for invalid argument", () => {
+  const actual = toUpperCaseWithCb("", () => {});
+  expect(actual).toBeUndefined();
+});
+```
+
+### **Why?**
+
+✅ **No Tracking Needed** – This test only checks the **return value** of `toUpperCaseWithCb`.  
+❌ **Does Not Track Calls** – The callback does **nothing**, so we cannot verify if it was called or with what arguments.
+
+## **Key Difference**
+
+| Callback Type  | Tracks Calls? | Tracks Arguments? | Used For                                                                |
+| -------------- | ------------- | ----------------- | ----------------------------------------------------------------------- |
+| `callBackMock` | ✅ Yes         | ✅ Yes             | When we need to check how the callback is used                          |
+| `()=>{}`       | ❌ No          | ❌ No              | When we don't care about the callback, only the function's return value |
+
+OtherUtils.ts
+
+```ts
+// Define a type 'stringInfo' that holds various string-related properties
+
+export type stringInfo = {
+
+  lowerCase: string;
+
+  upperCase: string;
+
+  characters: string[];
+
+  length: number;
+
+  extraInfo: Object | undefined;
+
+};
+
+// Define a type alias for a callback function that takes a string argument and returns void
+
+type LoggerServiceCallBack = (arg: string) => void;
+
+// Function to calculate the complexity score of a given stringInfo object
+
+export function calculateComplexity(stringInfo: stringInfo) {
+
+  // Multiply the number of keys in 'extraInfo' with the length of the string
+
+  return Object.keys(stringInfo.extraInfo).length * stringInfo.length;
+
+}
+
+// Function that converts a string to uppercase while invoking a callback
+
+export function toUpperCaseWithCb(
+
+  arg: string,
+
+  callback: LoggerServiceCallBack
+
+) {
+
+  if (!arg) {
+
+    callback("invalid argument");
+
+    return;
+
+  }
+
+  // Call the callback with a message indicating the function was called with the given argument
+
+  callback(`called function with ${arg}`);
+
+  return arg.toUpperCase();
+
+}
+
+```
+
+OtherUtils.test.ts
+
+```ts
+import {
+
+  calculateComplexity,
+
+  toUpperCaseWithCb,
+
+} from "../../app/doubles/OtherUtils";
+
+describe("OtherUtils test suite ", () => {
+
+  describe.only("Tracking callbacks with Jest Mocks", () => {
+
+    const callBackMock = jest.fn();
+
+    afterEach(() => {
+
+      jest.clearAllMocks();
+
+    });
+
+    it("calls callback for invalid argument - track calls", () => {
+
+      const actual = toUpperCaseWithCb("", callBackMock);
+
+      expect(actual).toBeUndefined();
+
+      expect(callBackMock).toBeCalledWith("invalid argument");
+
+      expect(callBackMock).toBeCalledTimes(1);
+
+    });
+
+    it("calls callback for valid argument-track calls", () => {
+
+      const actual = toUpperCaseWithCb("abc", callBackMock);
+
+      expect(actual).toBe("ABC");
+
+      expect(callBackMock).toBeCalledWith("called function with abc");
+
+      expect(callBackMock).toBeCalledTimes(1);
+
+    });
+
+  });
+
+  //Custom mock
+
+  describe("Tracking callbacks", () => {
+
+    let cbArgs = []; //An array to store the arguments passed to the callback
+
+    let timesCalled = 0; //A counter to track how many times the callback is called
+
+    function callBackMock(arg: string) {
+
+      cbArgs.push(arg); //Store each argument passed to the callback
+
+      timesCalled++; //Increment the counter each time the callback is called
+
+    }
+
+    afterEach(() => {
+
+      //Clearing tracking fields
+
+      cbArgs = [];
+
+      timesCalled = 0;
+
+    });
+
+    it("calls callback for invalid argument - track calls", () => {
+
+      const actual = toUpperCaseWithCb("", callBackMock);
+
+      expect(actual).toBeUndefined();
+
+      expect(cbArgs).toContain("invalid argument");
+
+      expect(timesCalled).toBe(1);
+
+    });
+
+    it("calls callback for valid argument - track calls", () => {
+
+      const actual = toUpperCaseWithCb("abc", callBackMock);
+
+      expect(actual).toBe("ABC");
+
+      expect(cbArgs).toContain("called function with abc");
+
+      expect(timesCalled).toBe(1);
+
+    });
+
+  });
+
+  it("ToUpperCase-calls callback for invalid argument", () => {
+
+    const actual = toUpperCaseWithCb("", () => {});
+
+    expect(actual).toBeUndefined();
+
+  });
+
+  it("ToUpperCase-calls callback for valid argument", () => {
+
+    const actual = toUpperCaseWithCb("abc", () => {});
+
+    expect(actual).toBe("ABC");
+
+  });
+
+  it("Calculates complexity", () => {
+
+    const someInfo = {
+
+      length: 5,
+
+      extraInfo: {
+
+        field1: "someInfo",
+
+        field2: "soneOtherInfo",
+
+      },
+
+    };
+
+    const actual = calculateComplexity(someInfo as any);
+
+    expect(actual).toBe(10);
+
+  });
+
+});
+
+```
