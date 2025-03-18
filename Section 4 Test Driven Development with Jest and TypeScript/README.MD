@@ -210,3 +210,19 @@ describe("PasswordChecker test suite", () => {
 });
 
 ```
+
+---
+
+## PassChecker Iteration 2
+
+ A password is invalid if 
+
+- length is less than 8 chars
+
+- has no upper case letters
+
+- has no lower case letters
+
+Requirement 2:
+
+- return the reason that make a password invalid
